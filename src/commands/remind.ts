@@ -1,8 +1,7 @@
-import moment from "moment/moment";
+import moment from "moment";
+import * as momentTz from 'moment-timezone';
 
-export const remind = (message) => {
-    // First, we want to extract the date and time from the message
-    // You can specify the date and time in any format you want, but for this example we will assume it is in the format "YYYY-MM-DD HH:MM"
+export const remind = (message: any) => {
     const dateString = message.content.split(' ')[1];
     const timeString = message.content.split(' ')[2];
 
@@ -17,13 +16,12 @@ export const remind = (message) => {
         timeZone = message.content.split('timezone')[1].trim();
     }
 
-    // Next, we want to convert the date and time to the specified time zone
-    date.utc().tz(timeZone);
+    date.tz(timeZone);
 
     // Finally, we want to set up a timer that will remind the user at the specified date and time
     // We will use the setTimeout() function for this
     setTimeout(() => {
         // When the timer fires, we want to send the user a message reminding them
         message.channel.send(`This is your reminder! The date and time you specified is: ${date.format('YYYY-MM-DD HH:mm')} ${timeZone}`);
-    }, date.getTime() - Date.now());
-};
+    }, date.unix() - Date.now());
+}
