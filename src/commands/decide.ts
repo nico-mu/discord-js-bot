@@ -18,7 +18,7 @@ const decideCommand = async (interaction: CommandInteraction) => {
             return {name: `Option ${index + 1}`, value: value};
         });
         const embed = new EmbedBuilder()
-            .setTitle("I decide...")
+            .setTitle("I am deciding...")
             .setDescription("I am deciding for you...")
             .setColor('#FEDD00')
             .setThumbnail(interaction.user.displayAvatarURL())
@@ -27,7 +27,7 @@ const decideCommand = async (interaction: CommandInteraction) => {
             await new Promise(resolve => setTimeout(resolve, 5000));
             const randomIndex = Math.floor(Math.random() * optionValues.length);
             fields[randomIndex].value = `__**${fields[randomIndex].value}**__`;
-            const embed = new EmbedBuilder().setTitle("I decided").setDescription("I have decided that '" + optionValues[randomIndex] + "' is the best option for you!").setFields(fields).setColor('#2A52BE').setThumbnail(interaction.user.displayAvatarURL());
+            const embed = new EmbedBuilder().setTitle("I have made a decision!").setDescription("I have decided that '" + optionValues[randomIndex] + "' is the best option for you!").setFields(fields).setColor('#2A52BE').setThumbnail(interaction.user.displayAvatarURL());
             await interaction.editReply({embeds: [embed]});
         });
     }
