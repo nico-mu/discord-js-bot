@@ -1,5 +1,8 @@
-import {Client, IntentsBitField, ChannelType} from "discord.js";
+import {Client, IntentsBitField, ChannelType, Events} from "discord.js";
 import {poke} from "./commands/poke";
+import {commands} from "./commands/commands";
+import {SlashCommand} from "./type/slash-command";
+import {executeCommand} from "./utils/command-execute-utils";
 
 export const client = new Client({
     intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.MessageContent, IntentsBitField.Flags.GuildMembers, IntentsBitField.Flags.GuildVoiceStates]
@@ -18,7 +21,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
         const interval = 60 * 1000; // 1 minute in milliseconds
         const timeout = setInterval(() => {
             const cycles = messageIntervals.get(newState.id)?.cycles ?? 0;
-            poke(newState.member!, `You have been deafened for ${cycles} Minutes`, "Wake up!");
+            poke(newState.member?.user!, `You have been deafened for ${cycles} Minutes`, "Wake up!");
             messageIntervals.set(newState.id, {timeout, cycles: cycles + 1});
         }, interval);
         messageIntervals.set(newState.id, {timeout, cycles: 1});
@@ -33,3 +36,8 @@ client.on('voiceStateUpdate', (oldState, newState) => {
     }
 });
 
+client.on(Events.InteractionCreate, async interaction => {
+    if (interaction.isCommand()) {
+        executeCommand(commands.get(interaction.commandName) as SlashCommand, interaction);
+    }
+});
