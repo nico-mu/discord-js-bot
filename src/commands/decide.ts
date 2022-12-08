@@ -27,7 +27,7 @@ const decideCommand = async (interaction: CommandInteraction) => {
             await new Promise(resolve => setTimeout(resolve, 5000));
             const randomIndex = Math.floor(Math.random() * optionValues.length);
             fields[randomIndex].value = `__**${fields[randomIndex].value}**__`;
-            const embed = new EmbedBuilder().setTitle("I decided").setDescription("I decided that " + optionValues[randomIndex] + " is the best option! The previous options were").setFields(fields).setColor('#2A52BE').setThumbnail(interaction.user.displayAvatarURL());
+            const embed = new EmbedBuilder().setTitle("I decided").setDescription("I have decided that '" + optionValues[randomIndex] + "' is the best option for you!").setFields(fields).setColor('#2A52BE').setThumbnail(interaction.user.displayAvatarURL());
             await interaction.editReply({embeds: [embed]});
         });
     }
