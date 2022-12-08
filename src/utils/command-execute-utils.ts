@@ -26,7 +26,7 @@ export async function registerCommands(applicationId: string, guildId: string, t
         .catch(logger.error);
 
     await rest.put(
-        Routes.applicationGuildCommands(applicationId, guildId),
+        Routes.applicationCommands(applicationId),
         { body: formattedCommands },
     ).then(() => logger.info("Successfully registered application commands.")).catch(logger.error);
 }
