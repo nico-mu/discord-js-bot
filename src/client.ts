@@ -1,62 +1,35 @@
-import {Client, IntentsBitField, ChannelType, GuildBasedChannel} from "discord.js";
-import {remind} from "./commands/remind";
-import {checkIfStringStartsWith} from "./utils/string-utils";
-import {commands} from "./commands/commands";
+import {Client, IntentsBitField, ChannelType} from "discord.js";
+import {poke} from "./commands/poke";
 
 export const client = new Client({
-    intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.MessageContent]
+    intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.MessageContent, IntentsBitField.Flags.GuildMembers, IntentsBitField.Flags.GuildVoiceStates]
 });
 
-let botCommandsChannel: GuildBasedChannel;
+const messageIntervals = new Map<string, {timeout: NodeJS.Timeout, cycles: number}>();
 
 client.on("ready", () => {
-    console.log("Ready!");
+    console.log("Bot is ready!");
 });
 
-client.on('guildCreate', async (guild) => {
-    let botCommandsCategory = guild.channels.cache.find(channel => channel.name === 'Bot Channels' && channel.type === ChannelType.GuildCategory);
-    if (!botCommandsCategory) {
-        botCommandsCategory = await guild.channels.create({
-            name: 'Bot Channels',
-            type: ChannelType.GuildCategory
-        });
-    }
-
-    if (!botCommandsChannel) {
-        botCommandsChannel = await guild.channels.create({
-            name: 'bot-commands',
-            type: ChannelType.GuildText,
-            parent: botCommandsCategory?.id,
-        });
-    }
-});
-
-client.on("messageCreate", async (message) => {
-    const guild = message.guild;
-    if (!guild) {
-        return;
-    }
-    let commandsChannel = guild.channels.cache.find(channel => channel.name === 'bot-commands' && channel.type === ChannelType.GuildText);
-    if (!commandsChannel) {
-        let botCommandsCategory = guild.channels.cache.find(channel => channel.name === 'Bot Channels' && channel.type === ChannelType.GuildCategory);
-        if (!botCommandsCategory) {
-            botCommandsCategory = await guild.channels.create({
-                name: 'Bot Channels',
-                type: ChannelType.GuildCategory
-            });
+client.on('voiceStateUpdate', (oldState, newState) => {
+    // Check if the user has deafened themselves
+    if (!oldState.selfDeaf && newState.selfDeaf) {
+        // Start sending messages every 1 minute
+        const interval = 60 * 1000; // 1 minute in milliseconds
+        const timeout = setInterval(() => {
+            const cycles = messageIntervals.get(newState.id)?.cycles ?? 0;
+            poke(newState.member!, `You have been deafened for ${cycles} Minutes`, "Wake up!");
+            messageIntervals.set(newState.id, {timeout, cycles: cycles + 1});
+        }, interval);
+        messageIntervals.set(newState.id, {timeout, cycles: 1});
+    } else if (oldState.selfDeaf && !newState.selfDeaf) {
+        // Stop sending messages if the user undeafens themselves
+        const noti = messageIntervals.get(newState.id);
+        if (noti) {
+            clearInterval(noti.timeout);
+            // Remove the interval for this user
+            messageIntervals.delete(newState.id);
         }
-        commandsChannel = await guild.channels.create({
-            name: 'bot-commands',
-            type: ChannelType.GuildText,
-            parent: botCommandsCategory?.id,
-        });
-    }
-    if (message.content.startsWith("!remind")) {
-        remind(message.author, message.content, commandsChannel);
-    }
-    if (message.channel.id === commandsChannel.id && !message.author.bot || checkIfStringStartsWith(message.content, commands)) {
-        // Delete the message
-        message.delete();
     }
 });
 
