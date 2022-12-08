@@ -3,6 +3,7 @@ import {poke} from "./commands/poke";
 import {commands} from "./commands/commands";
 import {SlashCommand} from "./type/slash-command";
 import {executeCommand} from "./utils/command-execute-utils";
+import {logger} from "./utils/logger-utils";
 
 export const client = new Client({
     intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.MessageContent, IntentsBitField.Flags.GuildMembers, IntentsBitField.Flags.GuildVoiceStates]
@@ -11,7 +12,7 @@ export const client = new Client({
 const messageIntervals = new Map<string, {timeout: NodeJS.Timeout, cycles: number}>();
 
 client.on("ready", () => {
-    console.log("Bot is ready!");
+    logger.info("Client is ready!");
 });
 
 client.on('voiceStateUpdate', (oldState, newState) => {

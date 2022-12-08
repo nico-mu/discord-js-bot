@@ -1,9 +1,8 @@
-import dotenv from 'dotenv';
 import {client} from "./src/client";
 import {registerCommands} from "./src/utils/command-execute-utils";
+import {environment} from "./src/environment";
 
-dotenv.config();
+client.login(environment.token);
 
-client.login(process.env.TOKEN);
+registerCommands(environment.applicationId!, environment.guildId!, environment.token!);
 
-registerCommands(process.env.APPLICATION_ID!, process.env.GUILD_ID!, process.env.TOKEN!);
